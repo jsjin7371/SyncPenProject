@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mpu6050.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,28 +109,34 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  if (HAL_UART_Transmit(&huart1, (uint8_t *)"BLE", 4, 100) == HAL_OK)
+  MPU6050_Data imu;
+  char msg[64];
+  int len;
+
+  if (MPU6050_Init(&hi2c1) != HAL_OK)
   {
-    HAL_UART_Transmit(&huart2, (uint8_t *)"BLE connection is ready\n", 25, 100);
+    HAL_UART_Transmit(&huart2, (uint8_t *)"MPU6050 init failed\r\n", 21, 100);
   }
   else
   {
-    HAL_UART_Transmit(&huart2, (uint8_t *)"Somtings worng with BLE\n", 25, 100);
+    HAL_UART_Transmit(&huart2, (uint8_t *)"MPU6050 OK\r\n", 12, 100);
   }
-
-  uint8_t rxData[10] = {};
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // BLE 모듈로 전송 (USART1 핀으로 출력)
-    char *ble_data = "Hello from STM32!\r\n";
-    HAL_UART_Transmit(&huart1, (uint8_t *)ble_data, 19, 100);
+    if (MPU6050_Read(&hi2c1, &imu) == HAL_OK)
+    {
+      len = snprintf(msg, sizeof(msg), "A:%d,%d,%d G:%d,%d,%d\r\n",
+                     imu.ax, imu.ay, imu.az,
+                     imu.gx, imu.gy, imu.gz);
+      HAL_UART_Transmit(&huart1, (uint8_t *)msg, len, 100);  // BLE
+      HAL_UART_Transmit(&huart2, (uint8_t *)msg, len, 100);  // PC 확인용
+    }
 
-    HAL_Delay(2000); // 2초마다 전송
+    HAL_Delay(100);  // 10Hz
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
