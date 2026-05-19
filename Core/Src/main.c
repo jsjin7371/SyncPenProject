@@ -110,11 +110,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   if (HAL_UART_Transmit(&huart1, (uint8_t *)"BLE", 4, 100) == HAL_OK)
   {
-    HAL_UART_Transmit(&huart2, (uint8_t *)"BLE connection is OK\n", 22, 100);
+    HAL_UART_Transmit(&huart2, (uint8_t *)"BLE connection is ready\n", 25, 100);
   }
   else
   {
-    HAL_UART_Transmit(&huart2, (uint8_t *)"Can not connect to BLE\n", 24, 100);
+    HAL_UART_Transmit(&huart2, (uint8_t *)"Somtings worng with BLE\n", 25, 100);
   }
 
   uint8_t rxData[10] = {};
@@ -125,17 +125,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-    if (HAL_UART_Receive(&huart2, (uint8_t *)rxData, 10, 100) == HAL_OK)
-    {
-      HAL_UART_Transmit(&huart2, (uint8_t *)"Well recive from Pc\n", 21, 100);
-      HAL_UART_Transmit(&huart2, rxData, sizeof(rxData), 100);
-    }
-
-    // 1. PC 확인용 (USB 케이블로 출력)
-    HAL_UART_Transmit(&huart2, (uint8_t *)"Sending to BLE...\r\n", 19, 100);
-
-    // 2. BLE 모듈로 전송 (USART1 핀으로 출력)
+    // BLE 모듈로 전송 (USART1 핀으로 출력)
     char *ble_data = "Hello from STM32!\r\n";
     HAL_UART_Transmit(&huart1, (uint8_t *)ble_data, 19, 100);
 
